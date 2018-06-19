@@ -172,6 +172,7 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 			double a0,a1,a2,a3,a4,a5,a6,a7,a8;
 			PdVector result = new PdVector();
 			PdVector result2 = new PdVector();
+			//double result2;
 			a0 = Double.parseDouble(txt1.getText());
 			a1 = Double.parseDouble(txt2.getText());
 			a2 = Double.parseDouble(txt3.getText());
@@ -185,14 +186,12 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 				msgLbl.setText("Specify new values for matrix A");
 				return;
 			}
-			double [][] MatrixA = {{a0,a1,a2},{a3,a4,a5},{a6,a7,a8}};
-			//msgLbl.setText(String.valueOf(MatrixA[0][0]));
-			//result = t2.calculateGradientEmbeddings();
-			//result2 = t2.calculateModifiedGradients(MatrixA);
-			//msgLbl.setText(String.valueOf(result.equals(result2)));
+			double [][] MatrixA = {{a0,a1,a2},{a3,a4,a5},{a6,a7,a8}};			
 			msgLbl.setText("...");
-			boolean res = t2.calculateModifiedGradients(MatrixA);
-			msgLbl.setText(String.valueOf(res));
+			result = t2.calculateGradientEmbeddings();
+			result2 = t2.calculateModifiedGradients(MatrixA);
+		//	msgLbl.setText(String.valueOf(result2));
+			msgLbl.setText(String.valueOf(result.equals(result2)));
 			t2.m_geom.update(t2.m_geom);
 			return;
 		}

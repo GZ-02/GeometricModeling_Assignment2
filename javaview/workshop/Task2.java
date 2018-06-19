@@ -311,26 +311,10 @@ public class Task2 extends PjWorkshop {
 		return gx;
 	}
 
-	public boolean checkIfElementSelected(PiVector indices){
-		boolean check = false;
-		int index1,index2,index3;
-		PdVector v1 = new PdVector(3);
-		PdVector v2 = new PdVector(3);
-		PdVector v3 = new PdVector(3);
-		PgElementSet triangle = new PgElementSet(3);
-		// Get indices of the triangle
-		index1 = indices.getEntry(0);
-		index2 = indices.getEntry(1);
-		index3 = indices.getEntry(2);
-		triangle.setNumElements(1);
-		triangle.setElement(0,index1,index2,index3);
-		check = triangle.hasTag(PsObject.IS_SELECTED);
-		return check;
-	}
 
 	// Calculate modified gradients
-	public boolean calculateModifiedGradients(double[][] A){
-		boolean b = false;
+	public PdVector calculateModifiedGradients(double[][] A){
+		boolean selected;
 		int numOfElements = m_geom.getNumElements();
 		int i;		
 		double x1,x2,x3;
@@ -339,16 +323,17 @@ public class Task2 extends PjWorkshop {
 		new_gx = new PdVector(3*numOfElements);
 		new_gy = new PdVector(3*numOfElements);
 		new_gz = new PdVector(3*numOfElements);
-		new_gx = gx;
-		new_gy = gy;
-		new_gz = gz;
+		for (i=0;i<3*numOfElements;i++){
+			new_gx.setEntry(i,gx.getEntry(i));
+			new_gy.setEntry(i,gy.getEntry(i));
+			new_gz.setEntry(i,gz.getEntry(i));
+		}
 		for(i=0;i<numOfElements;i++){
 			PiVector element = m_geom.getElement(i);
-			boolean selected = checkIfElementSelected(element);
+			selected = element.hasTag(PsObject.IS_SELECTED);
 			// Check if the triangle was selected by the user
 			// If it was, modify the appropriate gradients 
 			if(selected){
-				b = true;
 				// Modify gradient for x coordinates
 				x1 = A[0][0]*gx.getEntry(3*i+0) + A[0][1]*gx.getEntry(3*i+1) + A[0][2]*gx.getEntry(3*i+2);
 				x2 = A[1][0]*gx.getEntry(3*i+0) + A[1][1]*gx.getEntry(3*i+1) + A[1][2]*gx.getEntry(3*i+2);
@@ -374,8 +359,7 @@ public class Task2 extends PjWorkshop {
 				new_gz.setEntry(3*i+2,z3);
 			}
 		}
-		return b;
-	//	return new_gx;
+		return new_gx;
 	}
 
 
