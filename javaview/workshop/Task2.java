@@ -278,7 +278,7 @@ public class Task2 extends PjWorkshop {
 		PnSparseMatrix M = calculateMatrixM();
         PnSparseMatrix GT = PnSparseMatrix.transposeNew(G);
         
-		//𝑆 = 𝐺^𝑇 *𝑀 *𝐺
+        // S=G^T*M*G
 		PnSparseMatrix S = PnSparseMatrix.multMatrices(M, G, null);
 		S = PnSparseMatrix.multMatrices(GT, S, null);
 		
@@ -378,45 +378,6 @@ public class Task2 extends PjWorkshop {
 	//	return new_gx;
 	}
 
-
-	public PnSparseMatrix calculateMatrixM() {
-    	
-		PnSparseMatrix M = new PnSparseMatrix(m_geom.getNumElements() * 3, m_geom.getNumElements() * 3, 1);
-    	PiVector [] triangleArray = m_geom.getElements();
-    	
-		for(int triangleIndex = 0; triangleIndex < triangleArray.length; triangleIndex++) {
-            PiVector triangle = triangleArray[triangleIndex];
-            
-            PdVector v1 = m_geom.getVertex(triangle.getEntry(0));
-            PdVector v2 = m_geom.getVertex(triangle.getEntry(1));
-            PdVector v3 = m_geom.getVertex(triangle.getEntry(2));
-
-            PdVector A = PdVector.subNew(v2, v1);
-            PdVector B = PdVector.subNew(v3, v1);
- 
-            double area = PdVector.crossNew(A, B).length() * 0.5; // area = ||(p2 - p1) x (p3 - p1)|| * 0.5
-            //area = area/3; //Not sure if one third of the area is needed
-            int position = triangleIndex * 3;
-            
-            M.setEntry(position, position, area);
-            M.setEntry(position+1, position+1, area);
-            M.setEntry(position+2, position+2, area);
-    	}
-    	return M;
-    }
-	
-	public PnSparseMatrix calculateMatrixS(){
-		PnSparseMatrix G = calculateGradientMatrix();
-		PnSparseMatrix M = calculateMatrixM();
-        PnSparseMatrix GT = PnSparseMatrix.transposeNew(G);
-        
-		//𝑆 = 𝐺^𝑇 *𝑀 *𝐺
-		PnSparseMatrix S = PnSparseMatrix.multMatrices(M, G, null);
-		S = PnSparseMatrix.multMatrices(GT, S, null);
-		
-		return S;
-		
-	}
 
 	// method that implements simplified version of shape editing
 	public void computeDeformation(double[][] A){
