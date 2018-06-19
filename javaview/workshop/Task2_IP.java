@@ -190,7 +190,6 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 			msgLbl.setText("...");
 			result = t2.calculateGradientEmbeddings();
 			result2 = t2.calculateModifiedGradients(MatrixA);
-		//	msgLbl.setText(String.valueOf(result2));
 			msgLbl.setText(String.valueOf(result.equals(result2)));
 			t2.m_geom.update(t2.m_geom);
 			return;

@@ -365,12 +365,26 @@ public class Task2 extends PjWorkshop {
 
 	// method that implements simplified version of shape editing
 	public void computeDeformation(double[][] A){
+		PdVector rightSideX = new PdVector();
+		PdVector rightSideY = new PdVector();
+		PdVector rightSideZ = new PdVector();
+		PdVector newVx = new PdVector();
+		PdVector newVy = new PdVector();
+		PdVector newVz = new PdVector();
 		// First we calculate the gradients of embedding gx,gy and gz
 		calculateGradientEmbeddings();		
 		// Then based on the selection of user we modify the gradients and get new ones ~gx,~gy and ~gz
 		calculateModifiedGradients(A);		
+		// Get matrices M,S and G to 
+		PnSparseMatrix S = calculateMatrixS();
+		PnSparseMatrix M = calculateMatrixM();
+		PnSparseMatrix G = calculateGradientMatrix();
+		PnSparseMatrix GT = PnSparseMatrix.transposeNew(G);
 
-			
-	}
+		PnSparseMatrix B = PnSparseMatrix.multMatrices(GT,M,null);
+		PnSparseMatrix.rightMultVector(B,new_gx,rightSideX);
+		PnSparseMatrix.rightMultVector(B,new_gy,rightSideY);
+		PnSparseMatrix.rightMultVector(B,new_gz,rightSideZ);
+}
 
 }
