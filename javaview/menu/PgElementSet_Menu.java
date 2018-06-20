@@ -19,7 +19,8 @@ public class PgElementSet_Menu extends PgPointSet_Menu {
 	private enum MenuEntry{
 		MyWorkshop			("MyWorkshop..."),
 		Registration		("Surface Registration..."),
-		Task2				("Assignment2")
+		Task2				("Assignment2"),
+		Interpolation 		("Shape Interpolation")
 		// Additional entries...
 		;
 		protected final String name;
@@ -100,6 +101,18 @@ public class PgElementSet_Menu extends PgPointSet_Menu {
 			dialog = new PjWorkshop_Dialog(false);
 			dialog.setParent(t2);
 			dialog.update(t2);
+			dialog.setVisible(true);
+			break;
+		case Interpolation:
+			Interpolation inter = new Interpolation();
+			inter.setGeometry(m_elementSet);
+			if (currDisp == null) {
+				if (PsDebug.WARNING) PsDebug.warning("missing display.");
+			} else
+				inter.setDisplay(currDisp);
+			dialog = new PjWorkshop_Dialog(false);
+			dialog.setParent(inter);
+			dialog.update(inter);
 			dialog.setVisible(true);
 			break;
 		}

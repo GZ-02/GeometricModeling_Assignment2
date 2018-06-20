@@ -54,7 +54,6 @@ public class Task2 extends PjWorkshop {
     	m_geom.update(m_geom);
 	}
 	
-
 	// Calculate the normal of triangle surface
 	public PdVector calculateTriangleNormal(PdVector v1, PdVector v2, PdVector v3, int ind1, int ind2, int ind3){
 		PdVector ab = new PdVector(3);
@@ -107,15 +106,15 @@ public class Task2 extends PjWorkshop {
 		cross2 = PdVector.crossNew(normal,edge2);
 		cross3 = PdVector.crossNew(normal,edge3); 
 
-		triangleGradient[0][0] = (1/(2*embadon)) * cross1.getEntry(0); //normal.getEntry(0)*edge1.getEntry(0);
-		triangleGradient[0][1] = (1/(2*embadon)) * cross2.getEntry(0); //normal.getEntry(0)*edge2.getEntry(0);
-		triangleGradient[0][2] = (1/(2*embadon)) * cross3.getEntry(0); //normal.getEntry(0)*edge3.getEntry(0);
-		triangleGradient[1][0] = (1/(2*embadon)) * cross1.getEntry(1); //normal.getEntry(1)*edge1.getEntry(1);
-		triangleGradient[1][1] = (1/(2*embadon)) * cross2.getEntry(1); //normal.getEntry(1)*edge2.getEntry(1);
-		triangleGradient[1][2] = (1/(2*embadon)) * cross3.getEntry(1); //normal.getEntry(1)*edge3.getEntry(1);
-		triangleGradient[2][0] = (1/(2*embadon)) * cross1.getEntry(2); //normal.getEntry(2)*edge1.getEntry(2);
-		triangleGradient[2][1] = (1/(2*embadon)) * cross2.getEntry(2); //normal.getEntry(2)*edge2.getEntry(2);
-		triangleGradient[2][2] = (1/(2*embadon)) * cross3.getEntry(2); //normal.getEntry(2)*edge3.getEntry(2);
+		triangleGradient[0][0] = (1/(2*embadon)) * cross1.getEntry(0); 
+		triangleGradient[0][1] = (1/(2*embadon)) * cross2.getEntry(0); 
+		triangleGradient[0][2] = (1/(2*embadon)) * cross3.getEntry(0); 
+		triangleGradient[1][0] = (1/(2*embadon)) * cross1.getEntry(1); 
+		triangleGradient[1][1] = (1/(2*embadon)) * cross2.getEntry(1); 
+		triangleGradient[1][2] = (1/(2*embadon)) * cross3.getEntry(1); 
+		triangleGradient[2][0] = (1/(2*embadon)) * cross1.getEntry(2); 
+		triangleGradient[2][1] = (1/(2*embadon)) * cross2.getEntry(2); 
+		triangleGradient[2][2] = (1/(2*embadon)) * cross3.getEntry(2); 
 		return triangleGradient;
 	}
 
@@ -167,7 +166,7 @@ public class Task2 extends PjWorkshop {
 		return test;
 	}
 
-	public boolean TestGradientOrthogonality(){
+	public double TestGradientOrthogonality(){
 		boolean test = false;
 		boolean selected;
 		int numOfElements = m_geom.getNumElements();
@@ -187,7 +186,7 @@ public class Task2 extends PjWorkshop {
 				PdVector grad1 = new PdVector(gradient[0][0],gradient[1][0],gradient[2][0]);
 				PdVector grad2 = new PdVector(gradient[0][1],gradient[1][1],gradient[2][1]);
 				PdVector grad3 = new PdVector(gradient[0][2],gradient[1][2],gradient[2][2]);
-				if ((grad1.dot(edge1) == 0)){
+				if ((grad1.dot(edge1) == 0) || (grad2.dot(edge2) == 0) || (grad3.dot(edge3) == 0)){
 					test=true;
 					count++;
 				}
@@ -196,7 +195,7 @@ public class Task2 extends PjWorkshop {
 				} 
 			}
 		}
-		return test;
+		return ((double)count)/((double)numOfElements);
 	}
 
 

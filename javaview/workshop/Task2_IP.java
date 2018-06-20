@@ -193,7 +193,7 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 		}
 		else if (source == testbtn2){
 			testLbl2.setText("...");
-			boolean check2 = t2.TestGradientOrthogonality();
+			double check2 = t2.TestGradientOrthogonality();
 			testLbl2.setText(String.valueOf(check2));
 			return;
 		}
