@@ -1,21 +1,5 @@
 package workshop;
 
-import jv.geom.PgElementSet;
-import jv.object.PsConfig;
-import jv.object.PsDialog;
-import jv.object.PsUpdateIf;
-import jv.objectGui.PsList;
-import jv.project.PgGeometryIf;
-import jv.project.PvGeometryIf;
-import jv.viewer.PvDisplay;
-import jvx.project.PjWorkshop_IP;
-
-import jv.vecmath.PdMatrix;
-import jv.vecmath.PdVector;
-
-import Jama.Matrix;
-import Jama.SingularValueDecomposition;
-
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Dimension;
@@ -25,27 +9,40 @@ import java.awt.List;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Hashtable;
 import java.util.Vector;
 
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
+import jv.geom.PgElementSet;
+import jv.object.PsDebug;
+import jv.object.PsDialog;
+import jv.object.PsUpdateIf;
+import jv.objectGui.PsList;
+import jv.project.PgGeometryIf;
+import jv.project.PvGeometryIf;
+import jv.viewer.PvDisplay;
+import jvx.project.PjWorkshop_IP;
 
-/**
- * Info Panel of Workshop for surface Interpolation
- *
- */
-public class Interpolation_IP extends PjWorkshop_IP implements ActionListener{
+public class Interpolation_IP  extends PjWorkshop_IP implements ActionListener{
 	protected	List			m_listActive;
 	protected	List			m_listPassive;
 	protected	Vector			m_geomList;
-	protected	Interpolation	m_interpolation;
+	protected 	Interpolation 	m_interpolation;
 	protected   Button			m_bSetSurfaces;
 
-	// Our variables 
-	protected Button interpolate;
-	protected Label lbl;
-	
+    protected JSlider slider;
+    
+    protected double time = 0;
+    protected PgElementSet looseMesh;
+    protected PgElementSet gradientMesh;
+    
+    protected static final int SLIDER_MAX = 10;
+    
 
 	/** Constructor */
 	public Interpolation_IP () {
@@ -60,15 +57,15 @@ public class Interpolation_IP extends PjWorkshop_IP implements ActionListener{
 	 * The text is split at line breaks into individual lines on the dialog.
 	 */
 	public String getNotice() {
-		return "Select the two meshes for shape interpolation";
+		return "Assignment 2 Shape Interpolation";
 	}
 	
 	/** Assign a parent object. */
 	public void setParent(PsUpdateIf parent) {
 		super.setParent(parent);
-		m_interpolation = (Interpolation)parent;
+		m_interpolation = (Interpolation) parent;
 		
-		addSubTitle("Select meshes for shape interpolation");
+		addSubTitle("Select 2 meshes");
 		
 		Panel pGeometries = new Panel();
 		pGeometries.setLayout(new GridLayout(1, 2));
@@ -77,12 +74,12 @@ public class Interpolation_IP extends PjWorkshop_IP implements ActionListener{
 		Passive.setLayout(new BorderLayout());
 		Panel Active = new Panel();
 		Active.setLayout(new BorderLayout());
-		Label ActiveLabel = new Label("Input 1");
+		Label ActiveLabel = new Label("First Model");
 		Active.add(ActiveLabel, BorderLayout.NORTH);
 		m_listActive = new PsList(5, true);
 		Active.add(m_listActive, BorderLayout.CENTER);
 		pGeometries.add(Active);
-		Label PassiveLabel = new Label("Input 2");
+		Label PassiveLabel = new Label("Second Model");
 		Passive.add(PassiveLabel, BorderLayout.NORTH);
 		m_listPassive = new PsList(5, true);
 		Passive.add(m_listPassive, BorderLayout.CENTER);
@@ -90,23 +87,43 @@ public class Interpolation_IP extends PjWorkshop_IP implements ActionListener{
 		add(pGeometries);
 		
 		Panel pSetSurfaces = new Panel(new BorderLayout());
-		m_bSetSurfaces = new Button("Set selected meshes");
+		m_bSetSurfaces = new Button("Set selected surfaces");
 		m_bSetSurfaces.addActionListener(this);
 		pSetSurfaces.add(m_bSetSurfaces, BorderLayout.CENTER);
 		add(pSetSurfaces);
-		
-		Panel bottom = new Panel (new GridLayout(1,2));
-		interpolate = new Button("Shape Interpolation");
-		interpolate.addActionListener(this);
-	
-		lbl = new Label();
-	
-		bottom.add(interpolate);
-		bottom.add(lbl);
-		add(bottom);
-		
+
+		Panel panelBottom = new Panel(new GridLayout(3,1));
+        
+        slider = new JSlider(JSlider.HORIZONTAL, 0, SLIDER_MAX, 0);
+        slider.setMajorTickSpacing(5);
+        slider.setMinorTickSpacing(1);
+        slider.setPaintTicks(true);
+        slider.setPaintLabels(true);
+        Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
+        labelTable.put( new Integer( 0 ), new JLabel("0.0") );
+        labelTable.put( new Integer( 10 ), new JLabel("0.5") );
+        labelTable.put( new Integer( 20 ), new JLabel("1.0") );
+        slider.setLabelTable( labelTable );
+        slider.addChangeListener(new ChangeListener() {
+        	public void stateChanged(ChangeEvent e) {
+        		JSlider source = (JSlider)e.getSource();
+                if (!source.getValueIsAdjusting()) {
+                    double t = (int)source.getValue() / new Double(SLIDER_MAX);
+                    time = t;
+                    getMeshes();
+                } 
+        	}
+        });
+        panelBottom.add(slider);
+        add(panelBottom);
+
 		updateGeomList();
 		validate();
+	}
+
+	@Override
+	public Dimension getDialogSize() {
+		return new Dimension(600, 700);
 	}
 		
 	/** Initialisation */
@@ -147,15 +164,63 @@ public class Interpolation_IP extends PjWorkshop_IP implements ActionListener{
 	 */
 	public void actionPerformed(ActionEvent event) {
 		Object source = event.getSource();
+
 		if (source == m_bSetSurfaces) {
 			m_interpolation.setGeometries((PgElementSet)m_geomList.elementAt(m_listActive.getSelectedIndex()),
 			(PgElementSet)m_geomList.elementAt(m_listPassive.getSelectedIndex()));
-			return;
+			getMeshes();
 		}
-		else if (source == interpolate){
-			return;
-		}		
 	}
+	
+	/**
+	 * Get the loose and gradient mesh.
+	 * Removes the old meshes and adds the new
+	 */
+	private void getMeshes() {
+		if (looseMesh != null) {
+			removeMesh(looseMesh);
+		}
+		if (gradientMesh != null) {
+			removeMesh(gradientMesh);
+		}
+		looseMesh = m_interpolation.getInterpolatedset(time);
+		looseMesh.setVisible(false);
+		looseMesh.setName("LooseMesh");
+        addMesh(looseMesh);
+		gradientMesh = m_interpolation.getGradientInterpolated(looseMesh);
+		gradientMesh.setVisible(true);
+		gradientMesh.setName("GradientMesh");
+		addMesh(gradientMesh);
+	}
+	
+	/**
+	 * Removes a geometry from all displays
+	 * @param mesh The geometry to be removed
+	 */
+	private void removeMesh(PgElementSet mesh) {
+		Vector displays = m_interpolation.getGeometry().getDisplayList();
+		int numDisplays = displays.size();
+		for (int i=0; i<numDisplays; i++) {
+			PvDisplay disp =((PvDisplay)displays.elementAt(i));
+			disp.removeGeometry(mesh);
+			mesh.update(mesh);
+		}
+	}
+	
+	/**
+	 * Adds a geometry to all displays
+	 * @param mesh The geometry to be added
+	 */
+	private void addMesh(PgElementSet mesh) {
+		Vector displays = m_interpolation.getGeometry().getDisplayList();
+		int numDisplays = displays.size();
+		for (int i=0; i<numDisplays; i++) {
+			PvDisplay disp =((PvDisplay)displays.elementAt(i));
+			disp.addGeometry(mesh);
+			mesh.update(mesh);
+		}
+	}
+
 	/**
 	 * Get information which bottom buttons a dialog should create
 	 * when showing this info panel.
