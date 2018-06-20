@@ -11,7 +11,10 @@ import jv.object.PsDebug;
 import jv.project.PgGeometry;
 import jv.vecmath.PdVector;
 import jv.vecmath.PiVector;
+import jv.vecmath.PdMatrix;
 import jvx.project.PjWorkshop;
+import jvx.numeric.PnBiconjugateGradient;
+import jv.object.PsDebug;
 
 import jvx.numeric.PnSparseMatrix;
 import java.lang.Math;
@@ -375,5 +378,130 @@ public class Task2 extends PjWorkshop {
 		PnSparseMatrix.rightMultVector(B,new_gy,rightSideY);
 		PnSparseMatrix.rightMultVector(B,new_gz,rightSideZ);
 }
+
+	public void deform(PdMatrix deformMatrix) {
+        PnSparseMatrix G = calculateGradientMatrix();
+        PnSparseMatrix GT = PnSparseMatrix.transposeNew(G);
+        PnSparseMatrix M = calculateMatrixM();
+        PnSparseMatrix S = calculateMatrixS();
+        
+    	PnSparseMatrix left = PnSparseMatrix.copyNew(S);
+    	
+    	PdVector x = new PdVector(m_geom.getNumVertices());
+    	PdVector y = new PdVector(m_geom.getNumVertices());
+    	PdVector z = new PdVector(m_geom.getNumVertices());
+    	
+    	PdVector[] gTilda = computeGTilda(deformMatrix, G);
+    	PnSparseMatrix rightMatrix = PnSparseMatrix.multMatrices(GT, M, null);
+    	
+    	PdVector rx = PnSparseMatrix.rightMultVector(rightMatrix, gTilda[0], null);
+    	PdVector ry = PnSparseMatrix.rightMultVector(rightMatrix, gTilda[1], null);
+    	PdVector rz = PnSparseMatrix.rightMultVector(rightMatrix, gTilda[2], null);
+
+    	PnBiconjugateGradient CGSOLVER = new PnBiconjugateGradient();
+    		
+    	CGSOLVER.solve(left, x, rx);
+    	CGSOLVER.solve(left, y, ry);
+    	CGSOLVER.solve(left, z, rz);
+		
+    	
+    	PdVector[] vertices = m_geom.getVertices();
+		int numberofvertices = m_geom.getNumVertices();
+    	
+    	PdVector oldSum = new PdVector(3);
+    	PdVector newSum = new PdVector(3);
+    	for (int i = 0; i < m_geom.getNumVertices(); i++) {
+    		PdVector vertexOriginal = vertices[i];
+    		oldSum.add(vertexOriginal);
+    		
+    		newSum.setEntry(0, newSum.getEntry(0) + x.getEntry(i));
+    		newSum.setEntry(1, newSum.getEntry(1) + y.getEntry(i));
+    		newSum.setEntry(2, newSum.getEntry(2) + z.getEntry(i));
+    	}
+    	oldSum.multScalar(1.0 / numberofvertices);
+    	newSum.multScalar(1.0 / numberofvertices);
+    	
+    	PdVector averageTranslation = PdVector.subNew(oldSum, newSum);
+    	
+    	for (int index = 0; index < numberofvertices; index++) {
+    		PdVector newVertex = new PdVector(3);
+    		newVertex.setEntry(0, x.getEntry(index));
+    		newVertex.setEntry(1, y.getEntry(index));
+    		newVertex.setEntry(2, z.getEntry(index));
+    		newVertex.add(averageTranslation);
+			PsDebug.warning(newVertex.getEntry(0) + " ," + newVertex.getEntry(1)+ " , "+ newVertex.getEntry(2));
+    		m_geom.setVertex(index, newVertex);
+    	}
+    	
+    	m_geom.update(m_geom);
+    }
+	
+	public PdVector[] computeGTilda(PdMatrix deformMatrix, PnSparseMatrix G) {
+    	
+    	int n = m_geom.getNumVertices();
+        PdVector x = new PdVector(n);
+        PdVector y = new PdVector(n);
+        PdVector z = new PdVector(n);
+        for(int i = 0; i < n; i++) {
+            x.setEntry(i, m_geom.getVertex(i).getEntry(0));
+            y.setEntry(i, m_geom.getVertex(i).getEntry(1));
+            z.setEntry(i, m_geom.getVertex(i).getEntry(2));
+        }
+
+        PdVector gx = PnSparseMatrix.rightMultVector(G, x, null);
+        PdVector gy = PnSparseMatrix.rightMultVector(G, y, null);
+        PdVector gz = PnSparseMatrix.rightMultVector(G, z, null);
+
+        PiVector[] triangleArray = m_geom.getElements();
+        for(int i = 0; i < triangleArray.length; i++) {
+        	if (triangleArray[i].hasTag(PsObject.IS_SELECTED)) {
+            	//update(deformMatrix, gx, i);
+            	//update(deformMatrix, gy, i);
+            	//update(deformMatrix, gz, i);
+				PdVector temp = new PdVector(3);
+				temp.setEntry(0, gx.getEntry((3*i) + 0));
+				temp.setEntry(1, gx.getEntry((3*i) + 1));
+				temp.setEntry(2, gx.getEntry((3*i) + 2));
+				temp.leftMultMatrix(deformMatrix);
+				gx.setEntry((3*i) + 0, temp.getEntry(0));
+				gx.setEntry((3*i) + 1, temp.getEntry(1));
+				gx.setEntry((3*i) + 2, temp.getEntry(2));
+				
+				temp.setEntry(0, gy.getEntry((3*i) + 0));
+				temp.setEntry(1, gy.getEntry((3*i) + 1));
+				temp.setEntry(2, gy.getEntry((3*i) + 2));
+				temp.leftMultMatrix(deformMatrix);
+				gy.setEntry((3*i) + 0, temp.getEntry(0));
+				gy.setEntry((3*i) + 1, temp.getEntry(1));
+				gy.setEntry((3*i) + 2, temp.getEntry(2));
+				
+				temp.setEntry(0, gz.getEntry((3*i) + 0));
+				temp.setEntry(1, gz.getEntry((3*i) + 1));
+				temp.setEntry(2, gz.getEntry((3*i) + 2));
+				temp.leftMultMatrix(deformMatrix);
+				gz.setEntry((3*i) + 0, temp.getEntry(0));
+				gz.setEntry((3*i) + 1, temp.getEntry(1));
+				gz.setEntry((3*i) + 2, temp.getEntry(2));
+				
+            }
+        }
+
+        PdVector[] result = {gx, gy, gz};
+        
+        return result;
+    }
+	
+	public void update(PdMatrix deformMatrix, PdVector gp, int i){
+		PdVector temp = new PdVector(3);
+    	temp.setEntry(0, gp.getEntry((3*i) + 0));
+    	temp.setEntry(1, gp.getEntry((3*i) + 1));
+    	temp.setEntry(2, gp.getEntry((3*i) + 2));
+    	
+    	temp.leftMultMatrix(deformMatrix);
+    	
+    	gp.setEntry((3*i) + 0, temp.getEntry(0));
+    	gp.setEntry((3*i) + 1, temp.getEntry(1));
+    	gp.setEntry((3*i) + 2, temp.getEntry(2));
+	}
 
 }

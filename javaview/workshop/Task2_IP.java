@@ -10,6 +10,7 @@ import jv.object.PsUpdateIf;
 import jvx.project.PjWorkshop_IP;
 import jvx.numeric.PnSparseMatrix;
 import jv.vecmath.PdVector;
+import jv.vecmath.PdMatrix;
 
 public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 	
@@ -214,12 +215,25 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 				msgLbl.setText("Specify new values for matrix A");
 				return;
 			}
-			double [][] MatrixA = {{a0,a1,a2},{a3,a4,a5},{a6,a7,a8}};			
+			double [][] MatrixA = {{a0,a1,a2},{a3,a4,a5},{a6,a7,a8}};
+			PdMatrix deformMatrix = new PdMatrix(3, 3);
+			deformMatrix.setEntry(0, 0, a0);
+			deformMatrix.setEntry(0, 1, a1);
+			deformMatrix.setEntry(0, 2, a2);
+			deformMatrix.setEntry(1, 0, a3);
+			deformMatrix.setEntry(1, 1, a4);
+			deformMatrix.setEntry(1, 2, a5);
+			deformMatrix.setEntry(2, 0, a6);
+			deformMatrix.setEntry(2, 1, a7);
+			deformMatrix.setEntry(2, 2, a8);
 			msgLbl.setText("...");
 			result = t2.calculateGradientEmbeddings();
 			result2 = t2.calculateModifiedGradients(MatrixA);
-			msgLbl.setText(String.valueOf(result.equals(result2)));
-			t2.m_geom.update(t2.m_geom);
+			//compute deformation
+			t2.deform(deformMatrix);
+			//msgLbl.setText(String.valueOf(result.equals(result2)));
+			msgLbl.setText("Done!");
+			//t2.m_geom.update(t2.m_geom);
 			return;
 		}
 		else if (source == resetbtn){
