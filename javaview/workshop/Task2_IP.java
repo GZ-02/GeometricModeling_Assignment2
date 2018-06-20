@@ -20,15 +20,17 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 	protected Button matrixSbtn;
 	protected Button computeDeformation;
 	protected Button resetbtn;
+	protected Button testbtn1,testbtn2,testbtn3;
 
 	//Labels for assignment 2
 	protected Label gradientLbl;
 	protected Label laplaceLbl;
 	protected Label matrixMLbl;
 	protected Label matrixSLbl;
-	protected Label blankLbl,blankLbl1,blankLbl2,blankLbl3,blankLbl4,blankLbl5,blankLbl6,blankLbl7,blankLbl8,blankLbl9,blankLbl10,blankLbl11;
+	protected Label blankLbl,blankLbl1,blankLbl2,blankLbl3,blankLbl4,blankLbl5,blankLbl6,blankLbl7,blankLbl8,blankLbl9,blankLbl10,blankLbl11,blankLbl12;
 	protected Label explanationLbl;
 	protected Label msgLbl;
+	protected Label testLbl1,testLbl2,testLbl3;
 	
 	// Text fields for assignment 2
 	protected TextField txt1,txt2,txt3,txt4,txt5,txt6,txt7,txt8,txt9;
@@ -56,6 +58,7 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 		super.setParent(parent);
 		t2 = (Task2)parent;
 		
+		// Initialize buttons of panel
 		gradientbtn = new Button("Calculate Gradient Matrix");
 		gradientbtn.addActionListener(this);
 		laplacebtn = new Button("Calculate Laplace Matrix");
@@ -68,13 +71,23 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 		computeDeformation.addActionListener(this);
 		resetbtn = new Button("Reset");
 		resetbtn.addActionListener(this);
+		testbtn1 = new Button("Check G structure");
+		testbtn1.addActionListener(this);
+		testbtn2 = new Button("Check gradient orthogonal");
+		testbtn2.addActionListener(this);
 
+		// Initialize labels of panel
 		gradientLbl = new Label();
 		laplaceLbl = new Label();
 		matrixMLbl = new Label();
 		matrixSLbl = new Label();
 		explanationLbl = new Label();
 		msgLbl = new Label();
+		explanationLbl.setText("Specify matrix A:");
+		testLbl1 = new Label();
+		testLbl2 = new Label();
+		testLbl3 = new Label();
+		// Initialize blank labels that help keeping panel structure
 		blankLbl = new Label();
 		blankLbl1 =new Label();
 		blankLbl2 = new Label();
@@ -86,9 +99,9 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 		blankLbl8 = new Label();
 		blankLbl9 = new Label();
 		blankLbl10 = new Label();
-		blankLbl11 = new Label();
-		explanationLbl.setText("Specify matrix A:");
+		
 
+		// Initialize text fields of panel
 		txt1 = new TextField("1.0");
 		txt1.setEditable(true);
 		txt2 = new TextField("0.0");
@@ -136,7 +149,12 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 		ourPanel.add(txt7);
 		ourPanel.add(txt8);
 		ourPanel.add(txt9);
-		
+
+		ourPanel.add(testbtn1);
+		ourPanel.add(testLbl1);
+		ourPanel.add(testbtn2);
+		ourPanel.add(testLbl2);
+
 		ourPanel.add(computeDeformation);
 		ourPanel.add(msgLbl);
 		ourPanel.add(blankLbl10);
@@ -166,6 +184,18 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 			return;
 		}
 		else if (source == matrixSbtn){
+			return;
+		}
+		else if (source == testbtn1){
+			testLbl1.setText("...");
+			boolean check1 = t2.TestGradientStructure();
+			testLbl1.setText(String.valueOf(check1));
+			return;
+		}
+		else if (source == testbtn2){
+			testLbl2.setText("...");
+			boolean check2 = t2.TestGradientOrthogonality();
+			testLbl2.setText(String.valueOf(check2));
 			return;
 		}
 		else if (source == computeDeformation){
@@ -198,7 +228,6 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 			t2.m_geom.update(t2.m_geom);
 			return;
 		}
-
 	}
 	
 	protected int getDialogButtons(){

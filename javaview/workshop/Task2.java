@@ -52,75 +52,11 @@ public class Task2 extends PjWorkshop {
 		PdVector ab = new PdVector(3);
 		PdVector bc = new PdVector(3);
 		PdVector normal = new PdVector(3);
-		int min1,min2,min3;
-
-		// Find the order of indices from smaller to greater 
-		// and calculate vectors ab and bc (edges of triangle)
-		if (ind1<ind2 && ind1<ind3){
-			min1 = 1;
-			if (ind2<ind3){
-				min2 = 2;
-				min3 = 3;
-				ab = PdVector.subNew(v3,v2);
-				edge1 = ab;
-				edge2 = PdVector.subNew(v3,v1);
-				bc = PdVector.subNew(v2,v1);
-				edge3 = bc;
-			}
-			else{
-				min2 = 3;
-				min3 = 2;
-				ab = PdVector.subNew(v2,v3);
-				edge1 = ab;
-				bc = PdVector.subNew(v3,v1);
-				edge2 = bc;
-				edge3 = PdVector.subNew(v2,v1);
-			}
-		}
-
-		if (ind2<ind1 && ind2<ind3){
-			min1 = 2;
-			if (ind1<ind3){
-				min2 = 1;
-				min3 = 3;
-				edge1 = PdVector.subNew(v3,v2);
-				ab = PdVector.subNew(v3,v1);
-				edge2 = ab;
-				bc = PdVector.subNew(v1,v2);
-				edge3 = bc;
-			}
-			else{
-				min2 = 3;
-				min3 = 1;
-				ab = PdVector.subNew(v1,v3);
-				edge2 = ab;
-				bc = PdVector.subNew(v3,v2);
-				edge1 = bc;
-				edge3 = PdVector.subNew(v1,v2);
-			}
-		}
-
-		if (ind3<ind1 && ind3<ind2){
-			min1 = 3;
-			if (ind2<ind1){
-				min2 = 2;
-				min3 = 1;
-				ab = PdVector.subNew(v1,v2);
-				edge3 = ab;
-				bc = PdVector.subNew(v2,v3);
-				edge1 = bc;
-				edge2 = PdVector.subNew(v1,v3);
-			}
-			else{
-				min2 = 1;
-				min3 = 2;
-				ab = PdVector.subNew(v2,v1);
-				edge3 = ab; 
-				bc = PdVector.subNew(v1,v3);
-				edge2 = bc;
-				edge1 = PdVector.subNew(v2,v3);
-			}
-		}
+		ab = PdVector.subNew(v3,v2);
+		edge1 = ab;
+		bc = PdVector.subNew(v2,v1);
+		edge2 = bc;
+		edge3 = PdVector.subNew(v1,v3);
 		normal = PdVector.crossNew(ab,bc);
 		return normal;
 	}
@@ -197,8 +133,54 @@ public class Task2 extends PjWorkshop {
 			gradientMatrix.addEntry(3*i+2,index2,gradient[2][1]);
 			gradientMatrix.addEntry(3*i+2,index3,gradient[2][2]);
 		}
-		return gradientMatrix;
-		
+		return gradientMatrix;	
+	}
+
+	public boolean TestGradientStructure(){
+		boolean test = false;
+		PnSparseMatrix G = calculateGradientMatrix();
+		PiVector numOfnonZeros = new PiVector(); 
+		numOfnonZeros = G.getNumEntries();
+		int i;
+		for(i=0;i<numOfnonZeros.getSize();i++){
+			if (numOfnonZeros.getEntry(i) == 3)
+				test = true;
+			else
+				test=false;
+		}
+		return test;
+	}
+
+	public boolean TestGradientOrthogonality(){
+		boolean test = false;
+		boolean selected;
+		int numOfElements = m_geom.getNumElements();
+		PiVector VertexIndices = new PiVector(3);
+		int index1,index2,index3,i;
+		double gradient[][] = new double[3][3];
+		int count=0;
+		for(i=0;i<numOfElements;i++){
+			VertexIndices = m_geom.getElement(i);
+			selected = VertexIndices.hasTag(PsObject.IS_SELECTED);
+			if(selected){
+				VertexIndices = m_geom.getElement(i);
+				index1 = VertexIndices.getEntry(0);
+				index2 = VertexIndices.getEntry(1);
+				index3 = VertexIndices.getEntry(2);
+				gradient = calculateGradientOfTriangle(index1,index2,index3);
+				PdVector grad1 = new PdVector(gradient[0][0],gradient[1][0],gradient[2][0]);
+				PdVector grad2 = new PdVector(gradient[0][1],gradient[1][1],gradient[2][1]);
+				PdVector grad3 = new PdVector(gradient[0][2],gradient[1][2],gradient[2][2]);
+				if ((grad1.dot(edge1) == 0) && (grad2.dot(edge2) == 0) && (grad3.dot(edge3) == 0)){
+					test=true;
+					count++;
+				}
+				else{
+					test=false;	
+				} 
+			}
+		}
+		return test;
 	}
 
 
