@@ -49,6 +49,11 @@ public class Task2 extends PjWorkshop {
 		super.init();
 	}
 	
+	public void reset(){
+		m_geom.setVertices(m_geomSave.getVertices().clone());
+    	m_geom.update(m_geom);
+	}
+	
 
 	// Calculate the normal of triangle surface
 	public PdVector calculateTriangleNormal(PdVector v1, PdVector v2, PdVector v3, int ind1, int ind2, int ind3){

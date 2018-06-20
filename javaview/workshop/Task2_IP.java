@@ -237,7 +237,7 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 			return;
 		}
 		else if (source == resetbtn){
-			t2.m_geom.update(t2.m_geom);
+			t2.reset();
 			return;
 		}
 	}
