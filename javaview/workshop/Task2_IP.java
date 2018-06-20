@@ -30,7 +30,7 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 	protected Label blankLbl,blankLbl1,blankLbl2,blankLbl3,blankLbl4,blankLbl5,blankLbl6,blankLbl7,blankLbl8,blankLbl9,blankLbl10,blankLbl11,blankLbl12;
 	protected Label explanationLbl;
 	protected Label msgLbl;
-	protected Label testLbl1,testLbl2,testLbl3;
+	protected Label testLbl1,testLbl2;
 	
 	// Text fields for assignment 2
 	protected TextField txt1,txt2,txt3,txt4,txt5,txt6,txt7,txt8,txt9;
@@ -86,7 +86,6 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 		explanationLbl.setText("Specify matrix A:");
 		testLbl1 = new Label();
 		testLbl2 = new Label();
-		testLbl3 = new Label();
 		// Initialize blank labels that help keeping panel structure
 		blankLbl = new Label();
 		blankLbl1 =new Label();
@@ -103,7 +102,6 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 
 		// Initialize text fields of panel
 		txt1 = new TextField("1.0");
-		txt1.setEditable(true);
 		txt2 = new TextField("0.0");
 		txt3 = new TextField("0.0");
 		txt4 = new TextField("0.0");

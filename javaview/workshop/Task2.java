@@ -83,7 +83,10 @@ public class Task2 extends PjWorkshop {
 		PdVector v1 = new PdVector(3);
 		PdVector v2 = new PdVector(3);
 		PdVector v3 = new PdVector(3);
-		
+		PdVector cross1 = new PdVector();
+		PdVector cross2 = new PdVector();
+		PdVector cross3 = new PdVector();
+
 		// Get vertices of a triangle
 		v1 = m_geom.getVertex(index1);
 		v2 = m_geom.getVertex(index2);
@@ -91,15 +94,20 @@ public class Task2 extends PjWorkshop {
 
 		PdVector normal = calculateTriangleNormal(v1,v2,v3,index1,index2,index3);
 		double embadon = calculateTriangleArea(v1,v2,v3);
-		triangleGradient[0][0] = (1/(2*embadon)) * normal.getEntry(0)*edge1.getEntry(0);
-		triangleGradient[0][1] = (1/(2*embadon)) * normal.getEntry(0)*edge2.getEntry(0);
-		triangleGradient[0][2] = (1/(2*embadon)) * normal.getEntry(0)*edge3.getEntry(0);
-		triangleGradient[1][0] = (1/(2*embadon)) * normal.getEntry(1)*edge1.getEntry(1);
-		triangleGradient[1][1] = (1/(2*embadon)) * normal.getEntry(1)*edge2.getEntry(1);
-		triangleGradient[1][2] = (1/(2*embadon)) * normal.getEntry(1)*edge3.getEntry(1);
-		triangleGradient[2][0] = (1/(2*embadon)) * normal.getEntry(2)*edge1.getEntry(2);
-		triangleGradient[2][1] = (1/(2*embadon)) * normal.getEntry(2)*edge2.getEntry(2);
-		triangleGradient[2][2] = (1/(2*embadon)) * normal.getEntry(2)*edge3.getEntry(2);
+
+		cross1 = PdVector.crossNew(normal,edge1);
+		cross2 = PdVector.crossNew(normal,edge2);
+		cross3 = PdVector.crossNew(normal,edge3); 
+
+		triangleGradient[0][0] = (1/(2*embadon)) * cross1.getEntry(0); //normal.getEntry(0)*edge1.getEntry(0);
+		triangleGradient[0][1] = (1/(2*embadon)) * cross2.getEntry(0); //normal.getEntry(0)*edge2.getEntry(0);
+		triangleGradient[0][2] = (1/(2*embadon)) * cross3.getEntry(0); //normal.getEntry(0)*edge3.getEntry(0);
+		triangleGradient[1][0] = (1/(2*embadon)) * cross1.getEntry(1); //normal.getEntry(1)*edge1.getEntry(1);
+		triangleGradient[1][1] = (1/(2*embadon)) * cross2.getEntry(1); //normal.getEntry(1)*edge2.getEntry(1);
+		triangleGradient[1][2] = (1/(2*embadon)) * cross3.getEntry(1); //normal.getEntry(1)*edge3.getEntry(1);
+		triangleGradient[2][0] = (1/(2*embadon)) * cross1.getEntry(2); //normal.getEntry(2)*edge1.getEntry(2);
+		triangleGradient[2][1] = (1/(2*embadon)) * cross2.getEntry(2); //normal.getEntry(2)*edge2.getEntry(2);
+		triangleGradient[2][2] = (1/(2*embadon)) * cross3.getEntry(2); //normal.getEntry(2)*edge3.getEntry(2);
 		return triangleGradient;
 	}
 
@@ -171,7 +179,7 @@ public class Task2 extends PjWorkshop {
 				PdVector grad1 = new PdVector(gradient[0][0],gradient[1][0],gradient[2][0]);
 				PdVector grad2 = new PdVector(gradient[0][1],gradient[1][1],gradient[2][1]);
 				PdVector grad3 = new PdVector(gradient[0][2],gradient[1][2],gradient[2][2]);
-				if ((grad1.dot(edge1) == 0) && (grad2.dot(edge2) == 0) && (grad3.dot(edge3) == 0)){
+				if ((grad1.dot(edge1) == 0)){
 					test=true;
 					count++;
 				}
@@ -187,7 +195,6 @@ public class Task2 extends PjWorkshop {
 	// Calculates sparse matrix L in the formula D = L.v(x,y,z) {Lecture 5, slide 8}
 	// Also refer figure 3 in https://people.eecs.berkeley.edu/~jrs/meshpapers/Sorkine.pdf
 	public PnSparseMatrix calculateinitLaplaceMatrix(){
-		
 		int numOfVertices = m_geom.getNumVertices();
 		PnSparseMatrix initLaplace = new PnSparseMatrix(numOfVertices,numOfVertices);
 		//PdVector [] vertices = m_geom.getVertices();
