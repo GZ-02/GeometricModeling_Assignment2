@@ -180,9 +180,15 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 			return;
 		}
 		else if (source == matrixMbtn){
+			matrixMLbl.setText("...");
+			t2.calculateMatrixM();
+			matrixMLbl.setText("Matrix M created");
 			return;
 		}
 		else if (source == matrixSbtn){
+			matrixSLbl.setText("...");
+			t2.calculateMatrixS();
+			matrixSLbl.setText("Matrix S created");
 			return;
 		}
 		else if (source == testbtn1){
@@ -227,13 +233,9 @@ public class Task2_IP extends PjWorkshop_IP implements ActionListener {
 			deformMatrix.setEntry(2, 1, a7);
 			deformMatrix.setEntry(2, 2, a8);
 			msgLbl.setText("...");
-			result = t2.calculateGradientEmbeddings();
-			result2 = t2.calculateModifiedGradients(MatrixA);
 			//compute deformation
 			t2.deform(deformMatrix);
-			//msgLbl.setText(String.valueOf(result.equals(result2)));
 			msgLbl.setText("Done!");
-			//t2.m_geom.update(t2.m_geom);
 			return;
 		}
 		else if (source == resetbtn){

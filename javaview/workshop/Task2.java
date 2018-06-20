@@ -31,7 +31,6 @@ public class Task2 extends PjWorkshop {
 	PdVector edge2 = new PdVector(3);
 	PdVector edge3 = new PdVector(3);
 	PdVector gx,gy,gz;
-	PdVector new_gx, new_gy, new_gz; 
 
 	public Task2() {
 		super("Task2 of the geometric model");
@@ -308,80 +307,6 @@ public class Task2 extends PjWorkshop {
 	}
 
 
-	// Calculate modified gradients
-	public PdVector calculateModifiedGradients(double[][] A){
-		boolean selected;
-		int numOfElements = m_geom.getNumElements();
-		int i;		
-		double x1,x2,x3;
-		double y1,y2,y3;
-		double z1,z2,z3;
-		new_gx = new PdVector(3*numOfElements);
-		new_gy = new PdVector(3*numOfElements);
-		new_gz = new PdVector(3*numOfElements);
-		for (i=0;i<3*numOfElements;i++){
-			new_gx.setEntry(i,gx.getEntry(i));
-			new_gy.setEntry(i,gy.getEntry(i));
-			new_gz.setEntry(i,gz.getEntry(i));
-		}
-		for(i=0;i<numOfElements;i++){
-			PiVector element = m_geom.getElement(i);
-			selected = element.hasTag(PsObject.IS_SELECTED);
-			// Check if the triangle was selected by the user
-			// If it was, modify the appropriate gradients 
-			if(selected){
-				// Modify gradient for x coordinates
-				x1 = A[0][0]*gx.getEntry(3*i+0) + A[0][1]*gx.getEntry(3*i+1) + A[0][2]*gx.getEntry(3*i+2);
-				x2 = A[1][0]*gx.getEntry(3*i+0) + A[1][1]*gx.getEntry(3*i+1) + A[1][2]*gx.getEntry(3*i+2);
-				x3 = A[2][0]*gx.getEntry(3*i+0) + A[2][1]*gx.getEntry(3*i+1) + A[2][2]*gx.getEntry(3*i+2);
-				new_gx.setEntry(3*i+0,x1);
-				new_gx.setEntry(3*i+1,x2);
-				new_gx.setEntry(3*i+2,x3);
-
-				// Modify gradients for y coordinates
-				y1 = A[0][0]*gy.getEntry(3*i+0) + A[0][1]*gy.getEntry(3*i+1) + A[0][2]*gy.getEntry(3*i+2);
-				y2 = A[1][0]*gy.getEntry(3*i+0) + A[1][1]*gy.getEntry(3*i+1) + A[1][2]*gy.getEntry(3*i+2);
-				y3 = A[2][0]*gy.getEntry(3*i+0) + A[2][1]*gy.getEntry(3*i+1) + A[2][2]*gy.getEntry(3*i+2);
-				new_gy.setEntry(3*i+0,y1);
-				new_gy.setEntry(3*i+1,y2);
-				new_gy.setEntry(3*i+2,y3);
-				
-				// Modify gradients for z coordinates
-				z1 = A[0][0]*gz.getEntry(3*i+0) + A[0][1]*gz.getEntry(3*i+1) + A[0][2]*gz.getEntry(3*i+2);
-				z2 = A[1][0]*gz.getEntry(3*i+0) + A[1][1]*gz.getEntry(3*i+1) + A[1][2]*gz.getEntry(3*i+2);
-				z3 = A[2][0]*gz.getEntry(3*i+0) + A[2][1]*gz.getEntry(3*i+1) + A[2][2]*gz.getEntry(3*i+2);
-				new_gz.setEntry(3*i+0,z1);
-				new_gz.setEntry(3*i+1,z2);
-				new_gz.setEntry(3*i+2,z3);
-			}
-		}
-		return new_gx;
-	}
-
-
-	// method that implements simplified version of shape editing
-	public void computeDeformation(double[][] A){
-		PdVector rightSideX = new PdVector();
-		PdVector rightSideY = new PdVector();
-		PdVector rightSideZ = new PdVector();
-		PdVector newVx = new PdVector();
-		PdVector newVy = new PdVector();
-		PdVector newVz = new PdVector();
-		// First we calculate the gradients of embedding gx,gy and gz
-		calculateGradientEmbeddings();		
-		// Then based on the selection of user we modify the gradients and get new ones ~gx,~gy and ~gz
-		calculateModifiedGradients(A);		
-		// Get matrices M,S and G to 
-		PnSparseMatrix S = calculateMatrixS();
-		PnSparseMatrix M = calculateMatrixM();
-		PnSparseMatrix G = calculateGradientMatrix();
-		PnSparseMatrix GT = PnSparseMatrix.transposeNew(G);
-
-		PnSparseMatrix B = PnSparseMatrix.multMatrices(GT,M,null);
-		PnSparseMatrix.rightMultVector(B,new_gx,rightSideX);
-		PnSparseMatrix.rightMultVector(B,new_gy,rightSideY);
-		PnSparseMatrix.rightMultVector(B,new_gz,rightSideZ);
-}
 
 	public void deform(PdMatrix deformMatrix) {
         PnSparseMatrix G = calculateGradientMatrix();
